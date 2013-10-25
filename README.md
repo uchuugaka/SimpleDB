@@ -39,6 +39,7 @@ NSDictionary *userDict = [SimpleDB dictionaryValueForKey:users[0] inTable:@"User
 +(void) deleteForKey:(NSString*) key inTable:(NSString*) table;
 
 +(void) dropTable:(NSString*) table;
++(void) dropAllTables;
 
 +(dbStatus) status;
 +(NSString*) guid;
