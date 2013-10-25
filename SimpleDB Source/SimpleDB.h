@@ -90,6 +90,9 @@ typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDa
  */
 +(void) dropTable:(NSString*) table;
 
+/*! Removes all tables from the database. Any recorded deletions are also removed. */
++(void) dropAllTables;
+
 #pragma mark - Misc
 
 /*! Returns the status of the last operation.

@@ -25,8 +25,7 @@ static NSDateFormatter* stringValueFormatter;
 		status = CannotOpenDB;
 		return NO;
 	}
-	if (![self createTable:table]) {
-		status = WriteError;
+	if (![tables containsObject:table]) {
 		return NO;
 	}
 	
@@ -49,9 +48,8 @@ static NSDateFormatter* stringValueFormatter;
 		status = CannotOpenDB;
 		return nil;
 	}
-	if (![self createTable:table]) {
-		status = WriteError;
-		return nil;
+	if (![tables containsObject:table]) {
+		return keys;
 	}
 	
 	NSString *sql = [NSString stringWithFormat:@"select key from %@",table];
@@ -121,8 +119,7 @@ static NSDateFormatter* stringValueFormatter;
 		status = CannotOpenDB;
 		return nil;
 	}
-	if (![self createTable:table]) {
-		status = WriteError;
+	if (![tables containsObject:table]) {
 		return nil;
 	}
 	
@@ -292,6 +289,20 @@ static NSDateFormatter* stringValueFormatter;
 	[tables removeObject:table];
 }
 
++(void) dropAllTables {
+	if (![self openDB]) {
+		status = CannotOpenDB;
+		return;
+	}
+	
+	for (NSString *table in tables) {
+		[db sqlExecute:[NSString stringWithFormat:@"drop table %@",table]];
+	}
+	[db sqlExecute: @"delete from deletedRows"];
+	
+	[tables removeAllObjects];
+}
+
 #pragma mark - Misc
 
 +(dbStatus) status {
@@ -374,7 +385,11 @@ static NSDateFormatter* stringValueFormatter;
 	tables = [NSMutableArray array];
 	id<ABRecordset> tableList = [db tableSchema];
 	while (![tableList eof]) {
-		[tables addObject:[[tableList fieldWithName:@"name"] stringValue]];
+		NSString *table = [[tableList fieldWithName:@"name"] stringValue];
+		
+		if (![self specialTable:table]) { // don't include special tables
+			[tables addObject:table];
+		}
 		[tableList moveNext];
 	}
 	[tableList close];
@@ -386,7 +401,7 @@ static NSDateFormatter* stringValueFormatter;
 +(void) autoDelete:(NSTimer *)timer {
 	NSString *now = [self stringValueForDate:[NSDate date]];
 	for (NSString *table in tables) {
-		if (![table isEqualToString:@"simpleDBSettings"] && ![table isEqualToString:@"deletedRows"] && ![table isEqualToString:@"sqlite_stat1"]) { // don't include special tables
+		if (![self specialTable:table]) { // don't include special tables
 			NSString* sql = [NSString stringWithFormat:@"select key from %@ where autoDeleteDateTime < '%@'",table,now];
 			id<ABRecordset> results = [db sqlSelect:sql];
 			while (![results eof]) {
@@ -440,6 +455,12 @@ static NSDateFormatter* stringValueFormatter;
 	[tables addObject:table];
 	
 	return YES;
+}
+
++(BOOL) specialTable:(NSString*) table {
+	return [table isEqualToString:@"simpleDBSettings"]
+	|| [table isEqualToString:@"deletedRows"]
+	|| [table isEqualToString:@"sqlite_stat1"];
 }
 
 +(NSString*) stringValueForDate:(NSDate*) date {
