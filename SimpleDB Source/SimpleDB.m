@@ -65,6 +65,14 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(NSArray*) keysInTable:(NSString*) table orderByJSONValueForKey:(NSString*)jsonOrderKey passingTest:(TestBlock) testBlock {
+	return [self keysInTable:table orderByJSONValueForKey:jsonOrderKey reverseOrder:NO passingTest:testBlock];
+}
+
++(NSArray*) keysInTable:(NSString*) table reverseOrderByJSONValueForKey:(NSString*)jsonOrderKey passingTest:(TestBlock) testBlock {
+	return [self keysInTable:table orderByJSONValueForKey:jsonOrderKey reverseOrder:YES passingTest:testBlock];
+}
+
++(NSArray*) keysInTable:(NSString*) table orderByJSONValueForKey:(NSString*)jsonOrderKey reverseOrder:(BOOL) reverse passingTest:(TestBlock) testBlock {
 	NSAssert(table && table.length > 0,@"table must be provided");
 	NSMutableArray *keys = [NSMutableArray array];
 	NSMutableArray *sort = [NSMutableArray array];
@@ -97,8 +105,12 @@ static NSDateFormatter* stringValueFormatter;
 			NSString *value1 = [dict1 valueForKey:key1];
 			NSString *key2 = [dict2 allKeys][0];
 			NSString *value2 = [dict2 valueForKey:key2];
-			
-			return [value1 compare:value2 options:NSCaseInsensitiveSearch];
+
+			if (reverse) {
+				return [value2 compare:value1 options:NSCaseInsensitiveSearch];
+			} else {
+				return [value1 compare:value2 options:NSCaseInsensitiveSearch];
+			}
 		}];
 		
 		// add entries from dict array into keys
@@ -189,6 +201,21 @@ static NSDateFormatter* stringValueFormatter;
 	return results;
 }
 
++(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table {
+	Class class = NSClassFromString(className);
+	NSAssert(class,@"Unknown Class");
+	
+	id object = [class alloc];
+	NSAssert([object conformsToProtocol:@protocol(SimpleDBSerialization)],@"Object must conform to the SimpleDBSerialization protocol");
+	NSString *json = [self valueForKey:key inTable:table];
+	if (!json) {
+		return nil;
+	}
+	
+	object = [object initWithJSON:json];
+	return object;
+}
+
 +(void) setValue:(NSString*) value forKey:(NSString*) key inTable:(NSString*) table {
 	[self setValue:value forKey:key inTable:table autoDeleteAfter:nil];
 }
@@ -237,6 +264,15 @@ static NSDateFormatter* stringValueFormatter;
 	} else {
 		status = NoError;
 	}
+}
+
++(void) setValueOfObject:(id)object inTable:(NSString*) table {
+	[self setValueOfObject:object inTable:table autoDeleteAfter:nil];
+}
+
++(void) setValueOfObject:(id)object inTable:(NSString*) table autoDeleteAfter:(NSDate*) date {
+	NSAssert([object conformsToProtocol:@protocol(SimpleDBSerialization)],@"Object must conform to the SimpleDBSerialization protocol");
+	[self setValue:[object jsonValue] forKey:[object keyValue] inTable:table autoDeleteAfter:date];
 }
 
 #pragma mark - Delete
