@@ -40,7 +40,7 @@ NSDictionary *userDict = [SimpleDB dictionaryValueForKey:users[0] inTable:@"User
 +(NSString*) valueForKey:(NSString*) key inTable:(NSString*) table;
 +(NSDictionary*) dictionaryValueForKey:(NSString*) key inTable:(NSString*) table;
 +(id) jsonValueForKey:(NSString*) jsonKey tableKey:(NSString*) key inTable:(NSString*) table;
-+(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table;
++(id) instanceOfClassForKey:(NSString*) key inTable:(NSString*) table;
 
 +(void) setValue:(NSString*) value forKey:(NSString*) key inTable:(NSString*) table;
 +(void) setValue:(NSString*) value forKey:(NSString*) key inTable:(NSString*) table autoDeleteAfter:(NSDate*) date;
