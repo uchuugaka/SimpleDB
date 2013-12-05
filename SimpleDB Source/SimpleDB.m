@@ -251,7 +251,7 @@ static NSDateFormatter* stringValueFormatter;
 		if (date) {
 			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime='%@' where key = '%@'",table,[self sqlEscapeString:value],now,autoDeleteDate,[self sqlEscapeString:key]];
 		} else {
-			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@' where key = '%@'",table,[self sqlEscapeString:value],now,[self sqlEscapeString:key]];
+			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime=null where key = '%@'",table,[self sqlEscapeString:value],now,[self sqlEscapeString:key]];
 		}
 	}
 	
