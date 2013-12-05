@@ -201,7 +201,51 @@ static NSDateFormatter* stringValueFormatter;
 	return results;
 }
 
++(id)instanceOfClassForKey:(NSString*) key inTable:(NSString*) table {
+	NSString* sql = [NSString stringWithFormat:@"select value,className from %@ where key = '%@'",table,[self sqlEscapeString:key]];
+	id<ABRecordset> results = [db sqlSelect:sql];
+	if ([results eof]) {
+		[results close];
+		results = nil;
+		status = KeyNotFound;
+		
+		// see if key was previously deleted
+		sql = [NSString stringWithFormat:@"select autoDelete from deletedRows where tableName = '%@' and key = '%@'",table,[self sqlEscapeString:key]];
+		results = [db sqlSelect:sql];
+		if (![results eof]) {
+			if ([[results fieldAtIndex:0] booleanValue]) {
+				status = KeyAutoDeleted;
+			} else {
+				status = KeyDeleted;
+			}
+		}
+		[results close];
+		results = nil;
+		
+		return nil;
+	}
+	
+	NSString* json = [[results fieldAtIndex:0] stringValue];
+	NSString* className = [[results fieldAtIndex:1] stringValue];
+
+	[results close];
+	results = nil;
+	
+	status = NoError;
+	
+	Class class = NSClassFromString(className);
+	NSAssert(class,@"Unknown Class");
+	
+	id object = [class alloc];
+	NSAssert([object conformsToProtocol:@protocol(SimpleDBSerialization)],@"Object must conform to the SimpleDBSerialization protocol");
+
+	object = [object initWithJSON:json];
+	return object;
+}
+
 +(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table {
+	NSLog(@"instanceOfClass:forKey:inTable: is deprecated. Please use instanceOfClassForKey:inTable: instead");
+	
 	Class class = NSClassFromString(className);
 	NSAssert(class,@"Unknown Class");
 	
@@ -221,6 +265,10 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(void) setValue:(NSString *)value forKey:(NSString*) key inTable:(NSString*) table autoDeleteAfter:(NSDate*) date {
+	[self setValue:value forKey:key inTable:table autoDeleteAfter:date className:nil];
+}
+
++(void) setValue:(NSString *)value forKey:(NSString*) key inTable:(NSString*) table autoDeleteAfter:(NSDate*) date className:(NSString*)className {
 	NSAssert(value && value.length > 0, @"value must be provided");
 	NSAssert([NSJSONSerialization JSONObjectWithData:[value dataUsingEncoding:NSUTF8StringEncoding] options:0 error:NULL],@"Value must be JSON string");
 	NSAssert(key && key.length > 0,@"key must be provided");
@@ -236,6 +284,10 @@ static NSDateFormatter* stringValueFormatter;
 		return;
 	}
 	
+	if (!className) {
+		className = @"";
+	}
+	
 	NSString* autoDeleteDate = [self stringValueForDate:date];
 	NSString* now = [self stringValueForDate:[NSDate date]];
 	NSString* sql = [NSString stringWithFormat:@"select key from %@ where key = '%@'",table,key];
@@ -243,15 +295,15 @@ static NSDateFormatter* stringValueFormatter;
 	
 	if ([results eof]) {
 		if (date) {
-			sql = [NSString stringWithFormat:@"insert into %@(key,value,autoDeleteDateTime,addedDateTime,updatedDateTime) values('%@','%@','%@','%@','%@')",table,[self sqlEscapeString:key],[self sqlEscapeString:value],autoDeleteDate,now,now];
+			sql = [NSString stringWithFormat:@"insert into %@(key,value,autoDeleteDateTime,addedDateTime,updatedDateTime,className) values('%@','%@','%@','%@','%@','%@')",table,[self sqlEscapeString:key],[self sqlEscapeString:value],autoDeleteDate,now,now,className];
 		} else {
-			sql = [NSString stringWithFormat:@"insert into %@(key,value,addedDateTime,updatedDateTime) values('%@','%@','%@','%@')",table,[self sqlEscapeString:key],[self sqlEscapeString:value],now,now];
+			sql = [NSString stringWithFormat:@"insert into %@(key,value,addedDateTime,updatedDateTime,className) values('%@','%@','%@','%@','%@')",table,[self sqlEscapeString:key],[self sqlEscapeString:value],now,now,className];
 		}
 	} else {
 		if (date) {
-			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime='%@' where key = '%@'",table,[self sqlEscapeString:value],now,autoDeleteDate,[self sqlEscapeString:key]];
+			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime='%@',className='%@' where key = '%@'",table,[self sqlEscapeString:value],now,autoDeleteDate,className,[self sqlEscapeString:key]];
 		} else {
-			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime=null where key = '%@'",table,[self sqlEscapeString:value],now,[self sqlEscapeString:key]];
+			sql = [NSString stringWithFormat:@"update %@ set value='%@',updatedDateTime='%@',autoDeleteDateTime=null,className='%@' where key = '%@'",table,[self sqlEscapeString:value],now,className,[self sqlEscapeString:key]];
 		}
 	}
 	
@@ -271,8 +323,10 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(void) setValueOfObject:(id)object inTable:(NSString*) table autoDeleteAfter:(NSDate*) date {
+	NSAssert(object,@"Object must be provided");
 	NSAssert([object conformsToProtocol:@protocol(SimpleDBSerialization)],@"Object must conform to the SimpleDBSerialization protocol");
-	[self setValue:[object jsonValue] forKey:[object keyValue] inTable:table autoDeleteAfter:date];
+	NSString *className = NSStringFromClass([object class]);
+	[self setValue:[object jsonValue] forKey:[object keyValue] inTable:table autoDeleteAfter:date className:className];
 }
 
 #pragma mark - Delete
@@ -467,7 +521,7 @@ static NSDateFormatter* stringValueFormatter;
 		return NO;
 	}
 	
-	NSString *sql = [NSString stringWithFormat:@"create table %@(key text, value text, autoDeleteDateTime datetime, addedDateTime datetime, updatedDateTime datetime)",table];
+	NSString *sql = [NSString stringWithFormat:@"create table %@(key text, value text, className text, autoDeleteDateTime datetime, addedDateTime datetime, updatedDateTime datetime)",table];
 	[db sqlExecute:sql];
 	
 	if ([db lastErrorCode] && [db lastErrorCode] < 100) {

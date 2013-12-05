@@ -15,7 +15,7 @@ typedef enum {
 typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDate* dateModified);
 
 
-/*! This protocol must be supported to use the instanceOfClass:forKey:inTable and setValueOfObject:forKey:inTable calls  */
+/*! This protocol must be supported to use the instanceOfClassForKey:inTable and setValueOfObject:forKey:inTable calls  */
 @protocol SimpleDBSerialization <NSObject>
 
 -(id)initWithJSON:(NSString*)json;
@@ -79,13 +79,22 @@ typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDa
 
 
 
-/*! Returns an instance of the named class initialized with the JSON value for the given key. If the key does not exist, then nil is returned and the status is updated to KeyNotFound, KeyDeleted, or KeyAutoDeleted.
+/*! (Deprecated) 
+ * Returns an instance of the named class initialized with the JSON value for the given key. If the key does not exist, then nil is returned and the status is updated to KeyNotFound, KeyDeleted, or KeyAutoDeleted.
  * \param className The name of the class to be instantiated. It must conform to the SimpleDBSerialization protocol. This parameter is required.
  * \param key The key to lookup in table. This parameter is required.
  * \param table Table to search for key and retrieve value for parsing of the JSON. This parameter is required.
  */
 
 +(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table;
+
+
+/*! Used in conjunction with the setValueOfObject methods. 
+ * Returns an instance of the class used when setting the object value initialized with the JSON value for the given key. If the key does not exist, then nil is returned and the status is updated to KeyNotFound, KeyDeleted, or KeyAutoDeleted.
+ * \param key The key to lookup in table. This parameter is required.
+ * \param table Table to search for key and retrieve value for parsing of the JSON. This parameter is required.
+ */
++(id)instanceOfClassForKey:(NSString*) key inTable:(NSString*) table;
 
 
 /*! Sets the value in table for the given key. If the key already exists, then the value is updated.
