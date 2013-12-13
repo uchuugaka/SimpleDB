@@ -54,6 +54,8 @@ NSDictionary *userDict = [SimpleDB dictionaryValueForKey:users[0] inTable:@"User
 
 +(dbStatus) status;
 +(NSString*) guid;
++(NSString*) stringValueForDate:(NSDate*) date;
++(NSDate*) dateValueForString:(NSString*) string;
 ```
 
 ## ARC
