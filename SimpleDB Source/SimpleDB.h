@@ -158,4 +158,14 @@ typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDa
 
 /*! Returns a unique identifier as a string that can safely be used as a key. */
 +(NSString *)guid;
+
+/*! Returns a string representation of the given date. 
+ * \param date The date to return a string representation of. This parameter is required.
+ */
++(NSString*) stringValueForDate:(NSDate*) date;
+
+/*! Returns a date representation of the given string in the format used in stringValueForDate.
+ * \param string The string representation to return a date for. This parameter is required.
+ */
++(NSDate*) dateValueForString:(NSString*) string;
 @end

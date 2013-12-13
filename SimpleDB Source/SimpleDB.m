@@ -103,6 +103,7 @@ static NSDateFormatter* stringValueFormatter;
 			
 			NSString *key1 = [dict1 allKeys][0];
 			NSString *value1 = [dict1 valueForKey:key1];
+			
 			NSString *key2 = [dict2 allKeys][0];
 			NSString *value2 = [dict2 valueForKey:key2];
 
@@ -412,6 +413,28 @@ static NSDateFormatter* stringValueFormatter;
 	return uuidString;
 }
 
++(NSString*) stringValueForDate:(NSDate*) date {
+	if (!stringValueFormatter) {
+		stringValueFormatter = [[NSDateFormatter alloc] init];
+		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
+	}
+	
+	NSString *strDate = [stringValueFormatter stringFromDate:date];
+	
+	return strDate;
+}
+
++(NSDate*) dateValueForString:(NSString*) string {
+	if (!stringValueFormatter) {
+		stringValueFormatter = [[NSDateFormatter alloc] init];
+		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
+	}
+	
+	NSDate *date = [stringValueFormatter dateFromString:string];
+	
+	return date;
+}
+
 
 #pragma mark - private methods
 +(NSDictionary*) entryForKey:(NSString*) key inTable:(NSString*) table {
@@ -551,28 +574,6 @@ static NSDateFormatter* stringValueFormatter;
 	return [table isEqualToString:@"simpleDBSettings"]
 	|| [table isEqualToString:@"deletedRows"]
 	|| [table isEqualToString:@"sqlite_stat1"];
-}
-
-+(NSString*) stringValueForDate:(NSDate*) date {
-	if (!stringValueFormatter) {
-		stringValueFormatter = [[NSDateFormatter alloc] init];
-		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
-	}
-	
-	NSString *strDate = [stringValueFormatter stringFromDate:date];
-	
-	return strDate;
-}
-
-+(NSDate*) dateValueForString:(NSString*) string {
-	if (!stringValueFormatter) {
-		stringValueFormatter = [[NSDateFormatter alloc] init];
-		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
-	}
-	
-	NSDate *date = [stringValueFormatter dateFromString:string];
-	
-	return date;
 }
 
 +(NSString*)sqlEscapeString:(NSString *) string {
