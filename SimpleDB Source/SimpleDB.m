@@ -77,7 +77,8 @@ static NSDateFormatter* stringValueFormatter;
 	NSMutableArray *keys = [NSMutableArray array];
 	NSMutableArray *sort = [NSMutableArray array];
 	NSArray *testKeys = [self keysInTable:table];
-	for (NSString *key in testKeys) {
+	[testKeys enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		NSString *key = obj;
 		BOOL include = YES;
 		NSDictionary *entry = [self entryForKey:key inTable:table];
 		if (testBlock) {
@@ -89,11 +90,15 @@ static NSDateFormatter* stringValueFormatter;
 			if (!jsonValue) {
 				jsonValue = @"";
 			}
-			[sort addObject:@{key:jsonValue}];
+			@synchronized(sort) {
+				[sort addObject:@{key:jsonValue}];
+			}
 		} else if (include) {
-			[keys addObject:key];
+			@synchronized(keys) {
+				[keys addObject:key];
+			}
 		}
-	}
+	}];
 	
 	if (jsonOrderKey) {
 		// sort the dict array according to the values
