@@ -86,7 +86,7 @@ typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDa
  * \param table Table to search for key and retrieve value for parsing of the JSON. This parameter is required.
  */
 
-+(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table;
++(id)instanceOfClass:(NSString*)className forKey:(NSString*) key inTable:(NSString*) table __attribute__((deprecated("Use the new instanceOfClassForKey:inTable: method along with the SimpleDBSerialization protocol in your classes")));
 
 
 /*! Used in conjunction with the setValueOfObject methods. 
