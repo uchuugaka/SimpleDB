@@ -2,7 +2,7 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum {
+typedef NS_ENUM(NSUInteger,dbStatus) {
     NoError,
     KeyNotFound,
 	KeyDeleted,
@@ -10,10 +10,14 @@ typedef enum {
     ReadError,
     WriteError,
     CannotOpenDB
-} dbStatus;
+};
+
+typedef NS_ENUM(NSUInteger,dbOrder) {
+    DBOrderAscending,
+    DBOrderDescending
+};
 
 typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDate* dateModified);
-
 
 /*! This protocol must be supported to use the instanceOfClassForKey:inTable and setValueOfObject:forKey:inTable calls  */
 @protocol SimpleDBSerialization <NSObject>
@@ -76,7 +80,6 @@ typedef BOOL(^TestBlock)(NSString* key, NSString* value, NSDate* dateAdded, NSDa
  * \param table Table to search for key and retrieve value for parsing of the JSON. This parameter is required.
  */
 +(id) jsonValueForKey:(NSString*) jsonKey tableKey:(NSString*) key inTable:(NSString*) table;
-
 
 
 /*! (Deprecated) 

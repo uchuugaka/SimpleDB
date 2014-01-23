@@ -61,7 +61,7 @@ static NSDateFormatter* stringValueFormatter;
 	[results close];
 	results = nil;
 	
-	return keys;
+	return [NSArray arrayWithArray:keys];
 }
 
 +(NSArray*) keysInTable:(NSString*) table orderByJSONValueForKey:(NSString*)jsonOrderKey passingTest:(TestBlock) testBlock {
@@ -74,6 +74,11 @@ static NSDateFormatter* stringValueFormatter;
 
 +(NSArray*) keysInTable:(NSString*) table orderByJSONValueForKey:(NSString*)jsonOrderKey reverseOrder:(BOOL) reverse passingTest:(TestBlock) testBlock {
 	NSAssert(table && table.length > 0,@"table must be provided");
+	if (![self openDB]) {
+		status = CannotOpenDB;
+		return nil;
+	}
+	
 	NSMutableArray *keys = [NSMutableArray array];
 	NSMutableArray *sort = [NSMutableArray array];
 	NSArray *testKeys = [self keysInTable:table];
@@ -125,7 +130,7 @@ static NSDateFormatter* stringValueFormatter;
 		}
 	}
 	
-	return keys;
+	return [NSArray arrayWithArray:keys];
 }
 
 #pragma mark - Values
@@ -208,6 +213,11 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(id)instanceOfClassForKey:(NSString*) key inTable:(NSString*) table {
+	if (![self openDB]) {
+		status = CannotOpenDB;
+		return nil;
+	}
+	
 	NSString* sql = [NSString stringWithFormat:@"select value,className from %@ where key = '%@'",table,[self sqlEscapeString:key]];
 	id<ABRecordset> results = [db sqlSelect:sql];
 	if ([results eof]) {
