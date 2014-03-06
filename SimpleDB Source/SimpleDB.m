@@ -437,10 +437,13 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(NSString*) stringValueForDate:(NSDate*) date {
-	if (!stringValueFormatter) {
+	static NSDateFormatter* stringValueFormatter;
+
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		stringValueFormatter = [[NSDateFormatter alloc] init];
 		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
-	}
+	});
 	
 	NSString *strDate = [stringValueFormatter stringFromDate:date];
 	
@@ -448,10 +451,13 @@ static NSDateFormatter* stringValueFormatter;
 }
 
 +(NSDate*) dateValueForString:(NSString*) string {
-	if (!stringValueFormatter) {
+	static NSDateFormatter* stringValueFormatter;
+	
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		stringValueFormatter = [[NSDateFormatter alloc] init];
 		[stringValueFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'.'SSSZZZZZ"];
-	}
+	});
 	
 	NSDate *date = [stringValueFormatter dateFromString:string];
 	
