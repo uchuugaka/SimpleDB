@@ -112,15 +112,23 @@ static NSDateFormatter* stringValueFormatter;
 			NSDictionary *dict2 = obj2;
 			
 			NSString *key1 = [dict1 allKeys][0];
-			NSString *value1 = [dict1 valueForKey:key1];
+			id value1 = [dict1 valueForKey:key1];
 			
 			NSString *key2 = [dict2 allKeys][0];
-			NSString *value2 = [dict2 valueForKey:key2];
-
-			if (reverse) {
-				return [value2 compare:value1 options:NSCaseInsensitiveSearch];
+			id value2 = [dict2 valueForKey:key2];
+			
+			if ([value1 isKindOfClass:[NSNumber class]]) {
+				if (reverse) {
+					return [value2 compare:value1];
+				} else {
+					return [value1 compare:value2];
+				}
 			} else {
-				return [value1 compare:value2 options:NSCaseInsensitiveSearch];
+				if (reverse) {
+					return [value2 compare:value1 options:NSCaseInsensitiveSearch];
+				} else {
+					return [value1 compare:value2 options:NSCaseInsensitiveSearch];
+				}
 			}
 		}];
 		
