@@ -144,7 +144,6 @@ NSString *const kGiftTable = @"Gifts";
 
 -(NSDictionary *) dictionaryValue {
 	NSMutableDictionary *gift = [NSMutableDictionary dictionaryWithDictionary:@{ @"id": self.gift_id
-	                                                                             , @"contactId": self.contact_id
 	                                                                             , @"date": [SimpleDB stringValueForDate:self.date]
 	                                                                             , @"recognitionName": self.recognitionName
 	                                                                             , @"giftAmount": @(self.giftAmount)
