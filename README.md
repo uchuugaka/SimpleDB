@@ -16,7 +16,7 @@ Because the values stored must be JSON, sorting can be accomplished and specific
 ## Getting Started
 - Add the SimpleDB_Classes and the ABSQLite_Classes folders to your project
 	or use [CocoaPods](http://cocoapods.org)
-	pod 'SimpleDB', '~> 1.1'
+	*pod 'SimpleDB', '~> 1.1'*
 
 - Include the SQLite library in the linking area of XCode
 - Start saving and retrieving data
