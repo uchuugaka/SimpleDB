@@ -72,7 +72,7 @@ SimpleDB is available under the MIT license. See included license file
 
 ## Sample Class and Use
 
-#Gift.h
+##Gift.h
 ``` objective-c
 #import <Foundation/Foundation.h>
 #import "SimpleDB.h"
@@ -98,11 +98,10 @@ extern NSString *const kGiftTable;
 @end
 ```
 
-#Gift.m
+
+##Gift.m
 ``` objective-c
 #import "Gift.h"
-#import "NSString+Additions.h"
-#import "NSDate+Additions.h"
 
 NSString *const kGiftTable = @"Gifts";
 
@@ -126,7 +125,7 @@ NSString *const kGiftTable = @"Gifts";
 	if (self = [super init]) {
 		self.event_id = gift[@"event_id"];
 		self.gift_id = gift[@"id"];
-		self.date = [gift[@"date"] dateValue];
+        self.date = [SimpleDB dateValueForString:gift[@"date"]];
 		self.giftAmount = [gift[@"giftAmount"] intValue];
 		self.acknowledged = [gift[@"acknowledged"] boolValue];
 		self.name = gift[@"name"];
@@ -146,7 +145,7 @@ NSString *const kGiftTable = @"Gifts";
 -(NSDictionary *) dictionaryValue {
 	NSMutableDictionary *gift = [NSMutableDictionary dictionaryWithDictionary:@{ @"id": self.gift_id
 	                                                                             , @"contactId": self.contact_id
-	                                                                             , @"date": [self.date stringValue]
+	                                                                             , @"date": [SimpleDB stringValueForDate:self.date]
 	                                                                             , @"recognitionName": self.recognitionName
 	                                                                             , @"giftAmount": @(self.giftAmount)
 	                                                                             , @"acknowledged": (self.acknowledged ? @"YES" : @"NO") }];
@@ -167,9 +166,8 @@ NSString *const kGiftTable = @"Gifts";
 }
 
 -(NSString *) jsonValue {
-	NSDictionary *dict = [self dictionaryValue];
-    
-	return [NSString stringFromData:[NSJSONSerialization dataWithJSONObject:dict options:0 error:NULL]];
+	NSDictionary *dict = [self dictionaryValue];    
+	return [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:dict options:0 error:NULL] encoding:NSUTF8StringEncoding];
 }
 
 -(NSString *) keyValue {
