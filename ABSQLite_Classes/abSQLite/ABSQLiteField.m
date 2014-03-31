@@ -50,7 +50,7 @@ static NSDateFormatter* dateFormatter;
 	dispatch_sync(dbAccessQueue, ^{
 		
 		if (sqlite3_column_type(dbps, fieldIndex) == SQLITE_NULL) {
-			value = @"";
+			value = nil;
 		} else {
 			const char *c = (const char *)sqlite3_column_text(dbps, fieldIndex);
 			if (c)

@@ -56,7 +56,14 @@ NSDictionary *userDict = [SimpleDB dictionaryValueForKey:users[0] inTable:@"User
 +(NSString*) guid;
 +(NSString*) stringValueForDate:(NSDate*) date;
 +(NSDate*) dateValueForString:(NSString*) string;
+
 ```
+
+## CocoaPods
+SimpleDB is available through [CocoaPods](http://cocoapods.org), to install it simply add the following line to your Podfile:
+
+    pod "SimpleDB"
+
 
 ## ARC
 The enclosed classes require ARC

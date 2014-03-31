@@ -57,10 +57,7 @@
 	
 	int columnIdx = 0;
 	for (columnIdx = 0; columnIdx < _fieldCount; columnIdx++) {
-		NSString* columnName = [NSString stringWithUTF8String:sqlite3_column_name(dbps, columnIdx)];
-		columnName = [columnName lowercaseString];
-		
-		[columnNameToIndexMap setObject:[NSNumber numberWithInt:columnIdx] forKey:columnName];
+		columnNameToIndexMap[[@(sqlite3_column_name(dbps, columnIdx)) lowercaseString]] = @(columnIdx);
 	}
 	
 	columnNamesSetup = YES;
@@ -68,7 +65,7 @@
 
 - (int)columnIndexForName:(NSString*)columnName {
 	columnName = [columnName lowercaseString];
-	NSNumber *n = [columnNameToIndexMap objectForKey:columnName];
+	NSNumber *n = columnNameToIndexMap[columnName];
 	
 	if (n) {
 		return [n intValue];
@@ -146,8 +143,8 @@
 				eof = YES;
 				
 				if (dbrc < 100) {
-					NSString* errorMessage = [[NSString alloc] initWithUTF8String:sqlite3_errmsg(db)];
-					NSLog([NSString stringWithFormat:@"!!!! SQLite Error (%@) !!!! ",errorMessage]);
+//					NSString* errorMessage = [[NSString alloc] initWithUTF8String:sqlite3_errmsg(db)];
+					NSLog(@"!!!! SQLite Error in moveNext !!!! ");
 				}
 			}
 		}
