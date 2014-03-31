@@ -189,9 +189,22 @@ NSString *const kGiftTable = @"Gifts";
 #Using the class
 ``` objective-c
 
-Gift *gift = [Gift instanceForKey:@"testKey"];
-if (gift) {
-  gift.acknowledged = YES;
+// get array of unacknowledged gifts, order by amount
+NSArray *keys = [SimpleDB keysInTable:kGiftTable
+               orderByJSONValueForKey:@"amount"
+                         passingTest:^BOOL (NSString *key, NSString *value, NSDate *dateAdded, NSDate *dateModified) {
+                            Gift *gift = [[Gift alloc] initWithJSON:value];
+                            return [!gift.acknowledged];
+                         }];
+                                    
+for (NSString *giftKey in keys) {
+  Gift *gift = [Gift instanceForKey:giftKey];
+  if (gift) {
+    // do some processing here;
+
+    gift.acknowledged = YES;
+    [gift save];
+  }
 }
 
-[gift save];
+
