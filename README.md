@@ -91,7 +91,7 @@ extern NSString *const kGiftTable;
 
 +(instancetype) instanceForKey:(NSString *)key;
 -(void) save;
--(instancetype) initWithDictionary:(NSDictionary *)template;
+-(instancetype) initWithDictionary:(NSDictionary *)gift;
 -(instancetype) initWithJSON:(NSString *)json;
 -(NSDictionary *) dictionaryValue;
 
